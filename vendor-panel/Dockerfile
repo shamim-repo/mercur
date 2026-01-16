@@ -25,12 +25,6 @@ RUN yarn install
 # 5. Move to the specific service folder to build
 WORKDIR /app/vendor
 
-# 6. Set Build Variables
-ENV NODE_ENV=production
-ENV NEXT_TELEMETRY_DISABLED=1
-ENV NODE_OPTIONS="--max-old-space-size=4096"
-ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://backend:9000
-ENV VITE_MEDUSA_BACKEND_URL=http://backend:9000
 
 # 7. Build the specific service
 RUN yarn build
