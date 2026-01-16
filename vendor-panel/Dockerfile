@@ -16,7 +16,7 @@ COPY package.json ./
 
 # 5. Install dependencies
 # We use --no-lockfile to bypass any OS-specific lockfile issues
-RUN yarn install --no-lockfile
+RUN yarn install
 
 # 6. Copy the rest of the source code
 COPY . .
