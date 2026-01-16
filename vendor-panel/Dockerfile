@@ -7,7 +7,6 @@ RUN corepack enable
 
 COPY package.json yarn.lock ./
 
-# 2. Install dependencies (Yarn 3 uses --immutable for frozen lockfiles)
 RUN yarn install
 
 COPY . .
