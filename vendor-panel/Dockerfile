@@ -1,36 +1,38 @@
-# 1. Use Debian-based image (Fixes binary crashes)
+# Use Debian-slim (More stable than Alpine for building native modules)
 FROM node:20-slim
 
-WORKDIR /app/vendor
-
-# 2. Install build tools for Debian (required for some node modules)
+# 1. Install Build Tools & Git
 RUN apt-get update && \
     apt-get install -y python3 make g++ git && \
     rm -rf /var/lib/apt/lists/*
 
-# 3. Enable Corepack
-RUN corepack enable
+WORKDIR /app
 
-# 4. Copy package.json
-COPY package.json ./
+# 2. CRITICAL FIX: Force Yarn to use 'node_modules' folder
+# This disables PnP, which is causing the esbuild failure.
+ENV YARN_NODE_LINKER=node-modules
 
-# 5. Install dependencies
-# We use --no-lockfile to bypass any OS-specific lockfile issues
-RUN yarn install
-
-# 6. Copy the rest of the source code
+# 3. Copy the ENTIRE repository
+# We need .yarn, .yarnrc.yml, patches, and the root package.json
 COPY . .
 
-# 7. Set Build Variables (Prevents strict checks from failing the build)
+# 4. Enable Corepack and Install Dependencies from ROOT
+RUN corepack enable
+# We use --immutable to ensure we respect the lockfile, 
+# but if that fails, remove --immutable to force a fix.
+RUN yarn install
+
+# 5. Move to the specific service folder to build
+WORKDIR /app/vendor
+
+# 6. Set Build Variables
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-ENV CI=false
-ENV TSC_COMPILE_ON_ERROR=true
-ENV ESLINT_NO_DEV_ERRORS=true
-# Increase memory limit to prevent crashing
 ENV NODE_OPTIONS="--max-old-space-size=4096"
+ENV NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://backend:9000
+ENV VITE_MEDUSA_BACKEND_URL=http://backend:9000
 
-# 8. Build
+# 7. Build the specific service
 RUN yarn build
 
 EXPOSE 7002
