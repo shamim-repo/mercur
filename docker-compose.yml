@@ -58,7 +58,7 @@ services:
   # 5. Vendor Panel
   vendor:
     build:
-        context: .
+        context: ./vendor-panel
         dockerfile: ./vendor-panel
     restart: always
     depends_on:
