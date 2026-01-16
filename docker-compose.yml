@@ -57,7 +57,7 @@ services:
 
   # 5. Vendor Panel
   vendor:
-    build: ./vendor
+    build: ./vendor-panel
     restart: always
     depends_on:
       - backend
