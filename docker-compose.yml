@@ -46,7 +46,7 @@ services:
 
   # 4. Admin Panel
   admin:
-    build: ./admin
+    build: ./admin-panel
     restart: always
     depends_on:
       - backend
