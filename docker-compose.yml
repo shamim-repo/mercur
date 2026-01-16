@@ -57,7 +57,6 @@ services:
 
   # 5. Vendor Panel
   vendor:
-    context: .
     build: ./vendor-panel
     restart: always
     depends_on:
