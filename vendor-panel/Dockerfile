@@ -30,4 +30,4 @@ WORKDIR /app/vendor
 RUN yarn build
 
 EXPOSE 7002
-CMD ["yarn", "start"]
+CMD ["serve", "-s", "dist", "-l", "7002"]
