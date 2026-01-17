@@ -3,11 +3,6 @@ services:
   backend:
     build: ./backend
     restart: always
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_started
     ports:
       - "9000:9000"
 
