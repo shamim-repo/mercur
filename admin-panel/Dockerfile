@@ -1,15 +1,33 @@
+# -------- Stage 1: Build --------
 FROM node:20-alpine AS builder
-WORKDIR /app/admin
-RUN corepack enable  # <--- Add this
+WORKDIR /app
 
+# Enable Corepack
+RUN corepack enable
+
+# Copy package files and install deps
 COPY package.json yarn.lock ./
 RUN yarn install --immutable
+
+# Copy source code
 COPY . .
+
+# Build the Vite app
 RUN yarn build
 
-FROM node:20-alpine AS runner
-WORKDIR /app/admin
-RUN npm install -g serve
-COPY --from=builder /app/admin/dist ./dist
-EXPOSE 7001
-CMD ["serve", "-s", "dist", "-l", "7001"]
+# -------- Stage 2: Serve --------
+FROM nginx:alpine AS runner
+WORKDIR /usr/share/nginx/html
+
+# Remove default nginx static files
+RUN rm -rf ./*
+
+# Copy build output
+COPY --from=builder /app/dist ./
+
+# Optional: SPA fallback for React Router / Vite
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

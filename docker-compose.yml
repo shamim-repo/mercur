@@ -1,29 +1,4 @@
-version: '3.8'
-
 services:
-  # 1. PostgreSQL Database
-  postgres:
-    image: postgres:16-alpine
-    restart: always
-    environment:
-      POSTGRES_USER: mercur_user
-      POSTGRES_PASSWORD: mercur_password
-      POSTGRES_DB: mercur_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U mercur_user -d mercur_db" ]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  # 2. Redis (Required for Medusa cache/events)
-  redis:
-    image: redis:alpine
-    restart: always
-    volumes:
-      - redis_data:/data
-
   # 3. Backend (Mercur/Medusa API)
   backend:
     build: ./backend
@@ -33,14 +8,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    environment:
-      - NODE_ENV=production
-      - DATABASE_URL=postgres://mercur_user:mercur_password@postgres:5432/mercur_db
-      - REDIS_URL=redis://redis:6379
-      - JWT_SECRET=super_secret_jwt_key
-      - COOKIE_SECRET=super_secret_cookie_key
-      - ADMIN_CORS=/http:\/\/(admin\.yourdomain\.com|localhost:7001)$/
-      - STORE_CORS=/http:\/\/(store\.yourdomain\.com|localhost:8000)$/
     ports:
       - "9000:9000"
 
@@ -50,10 +17,8 @@ services:
     restart: always
     depends_on:
       - backend
-    environment:
-      - VITE_MEDUSA_BACKEND_URL=http://backend:9000
     ports:
-      - "7001:7001"
+      - "7001:80"
 
   # 5. Vendor Panel
   vendor:
@@ -61,12 +26,8 @@ services:
     restart: always
     depends_on:
       - backend
-    environment:
-      - VITE_MEDUSA_BACKEND_URL=http://backend:9000
-      # If vendor panel uses Next.js server-side calls:
-      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://backend:9000
     ports:
-      - "7002:7002"
+      - "7002:80"
 
   # 6. Storefront
   storefront:
@@ -74,11 +35,5 @@ services:
     restart: always
     depends_on:
       - backend
-    environment:
-      - NEXT_PUBLIC_MEDUSA_BACKEND_URL=http://backend:9000
     ports:
-      - "8000:8000"
-
-volumes:
-  postgres_data:
-  redis_data:
+      - "3000:3000"

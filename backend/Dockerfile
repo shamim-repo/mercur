@@ -1,17 +1,24 @@
 FROM node:20-alpine
-WORKDIR /app/backend
 
-# Fix: Enable Yarn 3
-RUN corepack enable
+# Required for some native deps
+RUN apk add --no-cache libc6-compat openssl
 
-# Install global CLI (optional, but good for Medusa)
-RUN npm install -g @medusajs/medusa-cli
+WORKDIR /app
 
+# Copy dependency files first (better caching)
 COPY package.json yarn.lock ./
-RUN yarn install --immutable
 
+# Install dependencies
+RUN yarn install --frozen-lockfile
+
+# Copy app source
 COPY . .
+
+# Build Medusa
 RUN yarn build
 
+# Medusa default port
 EXPOSE 9000
-CMD ["sh", "-c", "medusa migrations run && medusa start"]
+
+# Start Medusa
+CMD ["yarn", "start"]
